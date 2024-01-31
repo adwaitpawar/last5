@@ -1,0 +1,39 @@
+trigger:
+- main
+
+pool: 
+  name: default
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@1
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: SqlAzureDacpacDeployment@1
+  displayName: 'Execute Azure SQL : DacpacTask'
+  inputs:
+    azureSubscription: 'new'
+    ServerName: 'adwaits-server.database.windows.net'
+    DatabaseName: 'EmployeeDB'
+    SqlUsername: 'adwait'
+    SqlPassword: 'Django@13'
+    DacpacFile: 'emmanuel.dacpac'
+    authenticationType: 'server'
